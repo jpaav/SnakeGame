@@ -4,7 +4,7 @@ from enum import Enum
 
 class BoardStates(Enum):
 	EMPTY = 0
-	SNAKE = 1
+	# SNAKE = 1
 	APPLE = 2
 
 
@@ -21,5 +21,7 @@ class Board:
 			self.tiles[x_tile][y_tile] = BoardStates.APPLE
 
 	def update_board(self, snake):
+		old_board = self.tiles
+
 		pass
 		# Return true if colliding
