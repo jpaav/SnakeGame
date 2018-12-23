@@ -1,3 +1,4 @@
+import copy
 import random
 
 import numpy as np
@@ -40,14 +41,32 @@ class Snake:
 				print("Error in Snake.move(): left_turn=None even though should_turn=True.")
 		# Copy segments velocities so we can get previous values. Otherwise we would overwrite the data we need to read from
 		old_velocities = []
+		old_types = []
 		for segment in self.segments:
 			old_velocities.append(segment.velocity.copy())
+			old_types.append(copy.copy(segment.type))
 
 		for index, segment in enumerate(self.segments):
+			# Handle head
 			if index == 0:
 				segment.move()
 				continue
-			segment.move(old_velocities[index-1])
+			# Handle second segment (for turns)
+			if index == 1:
+				if self.should_turn:
+					if self.left_turn:
+						segment.move(old_velocities[index - 1], SegmentTypes.BODY_LEFT)
+					if not self.left_turn:
+						segment.move(old_velocities[index - 1], SegmentTypes.BODY_RIGHT)
+					continue
+				else:
+					segment.move(old_velocities[index], SegmentTypes.BODY_STRAIGHT)
+				continue
+			# Handle tail
+			if index == len(self.segments)-1:
+				segment.move(old_velocities[index-1])
+				continue
+			segment.move(old_velocities[index-1], old_types[index-1])
 		# Reset turn variables for next move
 		self.should_turn = False
 		self.left_turn = None

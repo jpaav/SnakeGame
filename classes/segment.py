@@ -20,21 +20,8 @@ class Segment(pg.sprite.Sprite):
 		self.velocity = velocity
 		self.type = segment_type
 		# Set picture according to type
-		if self.type == SegmentTypes.HEAD:
-			self.image = pg.image.load("resources/head.png").convert()
-		elif self.type == SegmentTypes.TAIL:
-			self.image = pg.image.load("resources/tail.png").convert()
-		elif self.type == SegmentTypes.BODY_STRAIGHT:
-			self.image = pg.image.load("resources/straight.png").convert()
-		elif self.type == SegmentTypes.BODY_LEFT:
-			self.image = pg.image.load("resources/left.png").convert()
-		elif self.type == SegmentTypes.BODY_RIGHT:
-			self.image = pg.image.load("resources/right.png").convert()
-		else:
-			self.image = pg.image.load("resources/error.png").convert()
-			print("type argument should be a SegmentTypes instance")
-		# Scale image to be proper dimensions according to class variables
-		self.image = pg.transform.scale(self.image, (self.width, self.height))
+		self.image = None
+		self.set_type(segment_type)
 
 	def __str__(self):
 		return str(self.position)
@@ -47,10 +34,12 @@ class Segment(pg.sprite.Sprite):
 			velocity_text = font.render(str(self.velocity), True, (0, 0, 0))
 			self.image.blit(velocity_text, (0, 0))
 
-	def move(self, new_velocity=None):
+	def move(self, new_velocity=None, new_type=None):
 		self.position += self.velocity
 		if new_velocity is not None:
 			self.velocity = new_velocity
+		if new_type is not None and new_type != self.type:
+			self.set_type(new_type)
 
 	def turn_left(self):
 		if self.velocity[0] != 0 and self.velocity[1] != 0:
@@ -67,6 +56,24 @@ class Segment(pg.sprite.Sprite):
 			self.velocity = np.array([0, -self.velocity[0]])
 		elif self.velocity[1] != 0:
 			self.velocity = np.array([self.velocity[1], 0])
+
+	def set_type(self, new_type):
+		self.type = new_type
+		if self.type == SegmentTypes.HEAD:
+			self.image = pg.image.load("resources/head.png").convert()
+		elif self.type == SegmentTypes.TAIL:
+			self.image = pg.image.load("resources/tail.png").convert()
+		elif self.type == SegmentTypes.BODY_STRAIGHT:
+			self.image = pg.image.load("resources/straight.png").convert()
+		elif self.type == SegmentTypes.BODY_LEFT:
+			self.image = pg.image.load("resources/left.png").convert()
+		elif self.type == SegmentTypes.BODY_RIGHT:
+			self.image = pg.image.load("resources/right.png").convert()
+		else:
+			self.image = pg.image.load("resources/error.png").convert()
+			print("type argument should be a SegmentTypes instance")
+		# Scale image to be proper dimensions according to class variables
+		self.image = pg.transform.scale(self.image, (self.width, self.height))
 
 
 class SegmentTypes(Enum):
