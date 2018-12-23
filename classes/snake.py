@@ -1,35 +1,54 @@
 import random
 
+import numpy as np
+
 from classes.segment import Segment, SegmentTypes
 
 
 class Snake:
-	# Includes head and tail
-	length = 3
-	# X and Y component velocities stored as a tuple
-	velocity = (1, 0)
 	alive = True
 	# Stores a list of tuples representing where the body currently is
 	# Should have length matching length variable
 	# First value should be head position, last value should be tail position
 	segments = []
 
-	def __init__(self, length=3, speed=250):
+	def __init__(self, length=3):
+		# Includes head and tail
 		self.length = length
 		# TODO: Maybe remove this line from __init__?
 		# idk its kinda essential and shouldn't be optional but gets called 3 times this way
 		# self.set_snake_pos()
 
-		# Number of milliseconds between moves
-		self.speed = speed
-
 		# Instance variable to detect whether the snake should turn next time it moves
 		self.should_turn = False
 		# Instance variable that tells the snake whether to turn left or right
 		self.left_turn = None
+		# If this is true, velocities will be drawn on the segments for debugging purposes
+		self.draw_velocities = False
 
 	def move(self):
 		# Don't move if dead
+		if not self.alive:
+			return
+		# Turn the head in the proper direction
+		if self.should_turn:
+			if self.left_turn:
+				self.segments[0].turn_left()
+			elif not self.left_turn:
+				self.segments[0].turn_right()
+			else:
+				print("Error in Snake.move(): left_turn=None even though should_turn=True.")
+		# Copy segments velocities so we can get previous values. Otherwise we would overwrite the data we need to read from
+		old_velocities = []
+		for segment in self.segments:
+			old_velocities.append(segment.velocity.copy())
+
+		for index, segment in enumerate(self.segments):
+			if index == 0:
+				segment.move()
+				continue
+			segment.move(old_velocities[index-1])
+		# Reset turn variables for next move
 		self.should_turn = False
 		self.left_turn = None
 
@@ -38,7 +57,6 @@ class Snake:
 		if self.should_turn:
 			return
 		self.left_turn = random.choices([True, False])
-		print(self.left_turn)
 		self.should_turn = True
 
 	def kill(self):
@@ -48,17 +66,21 @@ class Snake:
 		pass
 
 	# Initializes snake with proper length, starting at head_pos and moving with passed in velocity
-	def set_snake_pos(self, head_pos=(0, 0), velocity=(36, 0), tile_size=16):
-		self.segments = [Segment(SegmentTypes.HEAD, head_pos, tile_size, tile_size)]
+	def set_snake_pos(self, head_tile=np.array([0, 0]), velocity=np.array([36, 0]), tile_size=16):
+		self.segments = [Segment(SegmentTypes.HEAD, head_tile, velocity, tile_size, tile_size)]
 		for x in range(self.length-1):
-			new_pos = Segment.subtract_tuples(self.segments[x].position, velocity)
-			new_seg = Segment(SegmentTypes.BODY_STRAIGHT, new_pos, tile_size, tile_size)
+			new_type = SegmentTypes.BODY_STRAIGHT
+			if x == self.length-2:
+				new_type = SegmentTypes.TAIL
+			# NOTE: This will not use velocity to decide which direction to spawn snake in
+			new_tile = self.segments[x].tile - np.array([1, 0])
+			new_seg = Segment(new_type, new_tile, velocity, tile_size, tile_size)
 			self.segments.append(new_seg)
 
 	# 		TODO: CHECK IF THIS GOES OFF THE BOARD!!!
 
 	def draw(self, screen):
 		for segment in self.segments:
-			segment.draw(screen)
+			segment.draw(screen, self.draw_velocities)
 
 

@@ -1,3 +1,4 @@
+import numpy as np
 import pygame as pg
 
 from classes.board import Board
@@ -18,7 +19,7 @@ class SnakeGame:
 	difficulty = Difficulties(0)
 	apple_spawn_rate = 2000  # milliseconds between apple spawns
 	apple_spawn_amount = 1  # number of apples to spawn each time
-	snake_speed = 250  # milliseconds between moves for snake
+	snake_speed = 1000  # milliseconds between moves for snake
 	SPAWN_APPLES = pg.USEREVENT+1
 	MOVE = pg.USEREVENT+2
 	start_time = 0
@@ -39,7 +40,7 @@ class SnakeGame:
 		self.state = States.TITLE
 		# Set event timers
 		pg.time.set_timer(self.SPAWN_APPLES, self.apple_spawn_rate)
-		pg.time.set_timer(self.MOVE, self.snake.speed)
+		pg.time.set_timer(self.MOVE, self.snake_speed)
 		# Loop until should_quit is changed to true
 		while not self.should_quit:
 			self.loop()
@@ -47,7 +48,6 @@ class SnakeGame:
 
 	def loop(self):
 		self.check_events()
-		self.snake.move()
 		collision = self.board.update_board(self.snake)
 		if collision:
 			self.kill_snake()
@@ -90,6 +90,7 @@ class SnakeGame:
 		self.screen.blit(title_text, ((self.width/2) - title_text.get_rect().width/2, 10))
 
 	def draw_game(self):
+		self.screen.fill([0, 200, 0])
 		self.board.draw(self.screen)
 		self.snake.draw(self.screen)
 
@@ -115,8 +116,8 @@ class SnakeGame:
 
 	def begin_game(self):
 		self.start_time = pg.time.get_ticks()
-		self.snake = Snake()
-		self.snake.set_snake_pos(self.board.get_center(), (self.board.tile_size(), 0), self.board.tile_size())
+		self.snake = Snake(4)
+		self.snake.set_snake_pos(self.board.get_center_tile(), np.array([self.board.tile_size(), 0]), self.board.tile_size())
 		self.state = States.GAME
 
 	def kill_snake(self):

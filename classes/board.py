@@ -1,6 +1,8 @@
 import random
 from enum import Enum
 
+import numpy as np
+
 
 class BoardStates(Enum):
 	EMPTY = 0
@@ -37,7 +39,10 @@ class Board:
 		tile_size = self.tile_size()
 		center_x_tile = int(self.x_tiles/2)
 		center_y_tile = int(self.y_tiles/2)
-		return center_x_tile*tile_size, center_y_tile*tile_size
+		return np.array([center_x_tile*tile_size, center_y_tile*tile_size])
 
 	def tile_size(self):
 		return int(self.screen_dimensions[0]/self.x_tiles)
+
+	def get_center_tile(self):
+		return np.array([int(self.x_tiles/2), int(self.y_tiles/2)])
