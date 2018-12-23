@@ -14,7 +14,6 @@ class Segment(pg.sprite.Sprite):
 		x = tile[0]*np.linalg.norm(velocity)
 		y = tile[1]*np.linalg.norm(velocity)
 		self.position = np.array([x, y])
-		print(self.position)
 		self.width = width
 		self.height = height
 		self.velocity = velocity
