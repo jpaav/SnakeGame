@@ -13,12 +13,14 @@ class SnakeGame:
 	state = States(0)
 	screen = pg.display.set_mode((width, height))
 	font = None
-	board = Board()
+	board = Board((width, height))
 	snake = Snake()
 	difficulty = Difficulties(0)
 	apple_spawn_rate = 2000  # milliseconds between apple spawns
 	apple_spawn_amount = 1  # number of apples to spawn each time
+	snake_speed = 250  # milliseconds between moves for snake
 	SPAWN_APPLES = pg.USEREVENT+1
+	MOVE = pg.USEREVENT+2
 	start_time = 0
 
 	def start(self):
@@ -37,6 +39,7 @@ class SnakeGame:
 		self.state = States.TITLE
 		# Set event timers
 		pg.time.set_timer(self.SPAWN_APPLES, self.apple_spawn_rate)
+		pg.time.set_timer(self.MOVE, self.snake.speed)
 		# Loop until should_quit is changed to true
 		while not self.should_quit:
 			self.loop()
@@ -57,11 +60,16 @@ class SnakeGame:
 				self.should_quit = True
 			if event.type == self.SPAWN_APPLES:
 				self.board.spawn_apples(self.apple_spawn_amount)
+			if event.type == self.MOVE:
+				self.snake.move()
 			if event.type == pg.KEYDOWN:
 				if event.key == pg.K_ESCAPE:
 					self.should_quit = True
 				if event.key == pg.K_SPACE:
-					self.snake.turn()
+					if self.state == States.GAME:
+						self.snake.turn()
+					elif self.state == States.TITLE:
+						self.begin_game()
 
 	# Draw functions
 
@@ -78,11 +86,12 @@ class SnakeGame:
 	def draw_title(self):
 		# TODO: Replace this with a picture logo Ethan made
 		self.screen.fill([0, 200, 0])
-		title_text = self.font.render('Staterpillar', True, (255, 255, 255))
+		title_text = self.font.render('Stat-erpillar', True, (255, 255, 255))
 		self.screen.blit(title_text, ((self.width/2) - title_text.get_rect().width/2, 10))
 
 	def draw_game(self):
-		pass
+		self.board.draw(self.screen)
+		self.snake.draw(self.screen)
 
 	def draw_score(self):
 		pass
@@ -107,6 +116,7 @@ class SnakeGame:
 	def begin_game(self):
 		self.start_time = pg.time.get_ticks()
 		self.snake = Snake()
+		self.snake.set_snake_pos(self.board.get_center(), (self.board.tile_size(), 0), self.board.tile_size())
 		self.state = States.GAME
 
 	def kill_snake(self):

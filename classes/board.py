@@ -9,9 +9,12 @@ class BoardStates(Enum):
 
 
 class Board:
-	x_tiles = 16
-	y_tiles = 16
-	tiles = [[BoardStates.EMPTY] * x_tiles] * y_tiles
+
+	def __init__(self, screen_dimensions, x_tiles=16, y_tiles=16):
+		self.x_tiles = x_tiles
+		self.y_tiles = y_tiles
+		self.tiles = [[BoardStates.EMPTY] * x_tiles] * y_tiles
+		self.screen_dimensions = screen_dimensions
 
 	def spawn_apples(self, count=1):
 		# This algorithm may need changing so that it never spawns apples in the snake
@@ -25,3 +28,16 @@ class Board:
 
 		pass
 		# Return true if colliding
+
+	def draw(self, screen):
+		pass
+
+	def get_center(self):
+		# NOTE: Take margins into account if those get added!!
+		tile_size = self.tile_size()
+		center_x_tile = int(self.x_tiles/2)
+		center_y_tile = int(self.y_tiles/2)
+		return center_x_tile*tile_size, center_y_tile*tile_size
+
+	def tile_size(self):
+		return int(self.screen_dimensions[0]/self.x_tiles)

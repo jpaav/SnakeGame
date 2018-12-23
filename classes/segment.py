@@ -4,15 +4,15 @@ import pygame as pg
 
 
 class Segment(pg.sprite.Sprite):
-	position = (0, 0)
-	width = 16
-	height = 16
-
-	def __init__(self, position, type):
-		self.pos = position
+	def __init__(self, segment_type, position=(0, 0), width=16, height=16):
 		# Call Sprite constructor
 		super().__init__()
-		self.type = type
+		# Init segment
+		self.position = position
+		self.width = width
+		self.height = height
+		self.type = segment_type
+		# Set picture according to type
 		if self.type == SegmentTypes.HEAD:
 			self.image = pg.image.load("resources/head.png").convert()
 		elif self.type == SegmentTypes.TAIL:
@@ -24,10 +24,10 @@ class Segment(pg.sprite.Sprite):
 		elif self.type == SegmentTypes.BODY_RIGHT:
 			self.image = pg.image.load("resources/right.png").convert()
 		else:
-			self.image =  pg.image.load("resources/error.png").convert()
+			self.image = pg.image.load("resources/error.png").convert()
 			print("type argument should be a SegmentTypes instance")
-
-
+		# Scale image to be proper dimensions according to class variables
+		self.image = pg.transform.scale(self.image, (self.width, self.height))
 
 	@staticmethod
 	def subtract_tuples(tuple1, tuple2):
@@ -36,8 +36,8 @@ class Segment(pg.sprite.Sprite):
 	def __str__(self):
 		return str(self.position)
 
-	def draw(self):
-		pass
+	def draw(self, screen):
+		screen.blit(self.image, self.position)
 
 
 class SegmentTypes(Enum):
