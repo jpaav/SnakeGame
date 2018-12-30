@@ -3,6 +3,8 @@ from enum import Enum
 
 import numpy as np
 
+import pygame as pg
+
 
 class BoardStates(Enum):
 	EMPTY = 0
@@ -15,8 +17,13 @@ class Board:
 	def __init__(self, screen_dimensions, x_tiles=16, y_tiles=16):
 		self.x_tiles = x_tiles
 		self.y_tiles = y_tiles
-		self.tiles = [[BoardStates.EMPTY] * x_tiles] * y_tiles
+		self.tiles = np.array([[BoardStates.EMPTY] * x_tiles] * y_tiles)
 		self.screen_dimensions = screen_dimensions
+		self.image_empty = pg.image.load("resources/board_empty.png")
+		self.image_apple = pg.image.load("resources/board_apple.png")
+		# Scale image to be proper dimensions according to class variables
+		self.image_empty = pg.transform.scale(self.image_empty, (self.tile_size(), self.tile_size()))
+		self.image_apple = pg.transform.scale(self.image_apple, (self.tile_size(), self.tile_size()))
 
 	def spawn_apples(self, count=1):
 		# This algorithm may need changing so that it never spawns apples in the snake
@@ -32,7 +39,17 @@ class Board:
 		# Return true if colliding
 
 	def draw(self, screen):
-		pass
+		print("================ DRAW ITERATION ================")
+		for col_index, tile_col in enumerate(self.tiles):
+			# print("col_index: " + str(col_index))
+			for row_index, tile in enumerate(tile_col):
+				# print("row_index: " + str(row_index))
+				print("tile: " + str(tile))
+				if tile == BoardStates.EMPTY:
+					screen.blit(self.image_empty, (self.tile_size() * col_index, self.tile_size() * row_index))
+				elif tile == BoardStates.APPLE:
+					screen.blit(self.image_apple, (self.tile_size() * col_index, self.tile_size() * row_index))
+		return
 
 	def get_center(self):
 		# NOTE: Take margins into account if those get added!!
