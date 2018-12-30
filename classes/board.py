@@ -33,23 +33,24 @@ class Board:
 			self.tiles[x_tile][y_tile] = BoardStates.APPLE
 
 	def update_board(self, snake):
-		old_board = self.tiles
-
-		pass
-		# Return true if colliding
+		# Checks if the snake has been spawned
+		if len(snake.segments) > 0:
+			# Checks if the snake's head is in a board tile with an apple
+			head_pos = (snake.segments[0].tile[0], snake.segments[0].tile[1])
+			if self.tiles[head_pos[0]][head_pos[1]] == BoardStates.APPLE:
+				# Eat the apple
+				snake.grow()
+				# Remove the apple from the board
+				self.tiles[head_pos[0]][head_pos[1]] = BoardStates.EMPTY
+		#  Handle snake's collisions with self and edge
 
 	def draw(self, screen):
-		print("================ DRAW ITERATION ================")
 		for col_index, tile_col in enumerate(self.tiles):
-			# print("col_index: " + str(col_index))
 			for row_index, tile in enumerate(tile_col):
-				# print("row_index: " + str(row_index))
-				print("tile: " + str(tile))
 				if tile == BoardStates.EMPTY:
 					screen.blit(self.image_empty, (self.tile_size() * col_index, self.tile_size() * row_index))
 				elif tile == BoardStates.APPLE:
 					screen.blit(self.image_apple, (self.tile_size() * col_index, self.tile_size() * row_index))
-		return
 
 	def get_center(self):
 		# NOTE: Take margins into account if those get added!!

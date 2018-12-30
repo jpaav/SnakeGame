@@ -48,9 +48,9 @@ class SnakeGame:
 
 	def loop(self):
 		self.check_events()
-		collision = self.board.update_board(self.snake)
-		if collision:
-			self.kill_snake()
+		self.board.update_board(self.snake)
+		if not self.snake.alive:
+			self.state = States.DEAD
 		self.draw()
 		pg.display.update()
 
@@ -119,7 +119,3 @@ class SnakeGame:
 		self.snake = Snake(4)
 		self.snake.set_snake_pos(self.board.get_center_tile(), np.array([self.board.tile_size(), 0]), self.board.tile_size())
 		self.state = States.GAME
-
-	def kill_snake(self):
-		self.snake.kill()
-		self.state = States.DEAD

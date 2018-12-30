@@ -82,7 +82,18 @@ class Snake:
 		self.alive = False
 
 	def grow(self):
-		pass
+		self.length += 1
+		# Set up new tail segment
+		new_tile = self.segments[-1].tile - self.segments[-1].normalized_velocity()
+		new_velocity = self.segments[-1].velocity
+		width = self.segments[0].width
+		height = self.segments[0].height
+		new_tail = Segment(SegmentTypes.TAIL, new_tile, new_velocity, width, height)
+		# Add new tail segment
+		self.segments.append(new_tail)
+		# Set old tail segment to proper SegmentType
+		# TODO: Still need to implement this!!
+		# it currently updates the next time around but there may be problems with this method also it is slow visually
 
 	# Initializes snake with proper length, starting at head_pos and moving with passed in velocity
 	def set_snake_pos(self, head_tile=np.array([0, 0]), velocity=np.array([36, 0]), tile_size=16):

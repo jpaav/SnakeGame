@@ -34,9 +34,14 @@ class Segment(pg.sprite.Sprite):
 			self.image.blit(velocity_text, (0, 0))
 
 	def move(self, new_velocity=None, new_type=None):
+		# Update position
 		self.position += self.velocity
+		# Update tile
+		self.tile += self.normalized_velocity()
+		# Change velocity if new one is supplied
 		if new_velocity is not None:
 			self.velocity = new_velocity
+		# Change segment type if new one is supplied
 		if new_type is not None and new_type != self.type:
 			self.set_type(new_type)
 
@@ -73,6 +78,10 @@ class Segment(pg.sprite.Sprite):
 			print("type argument should be a SegmentTypes instance")
 		# Scale image to be proper dimensions according to class variables
 		self.image = pg.transform.scale(self.image, (self.width, self.height))
+
+	def normalized_velocity(self):
+		mag = np.linalg.norm(self.velocity)
+		return np.array([int(self.velocity[0] / mag), int(self.velocity[1] / mag)])
 
 
 class SegmentTypes(Enum):
