@@ -32,7 +32,7 @@ class Board:
 			y_tile = random.randint(0, self.y_tiles-1)
 			self.tiles[x_tile][y_tile] = BoardStates.APPLE
 
-	def update_board(self, snake):
+	def update_board(self, snake, score):
 		# Checks if the snake has been spawned
 		if len(snake.segments) > 0:
 			# Checks if the snake's head is in a board tile with an apple
@@ -43,6 +43,8 @@ class Board:
 					snake.grow()
 					# Remove the apple from the board
 					self.tiles[head_pos[0]][head_pos[1]] = BoardStates.EMPTY
+					# Add to score
+					score += 1
 			# Make sure that the program doesn't crash if head is out of bounds (this is handled elsewhere)
 			except IndexError:
 				pass
@@ -61,6 +63,7 @@ class Board:
 				snake.kill()
 			if y > self.y_tiles-1 or y < 0:
 				snake.kill()
+			return score
 
 	def draw(self, screen):
 		for col_index, tile_col in enumerate(self.tiles):

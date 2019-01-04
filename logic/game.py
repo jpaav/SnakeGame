@@ -14,6 +14,7 @@ class SnakeGame:
 	state = States(0)
 	screen = pg.display.set_mode((width, height))
 	font = None
+	info_font = None
 	board = Board((width, height))
 	snake = Snake()
 	difficulty = Difficulties(0)
@@ -23,6 +24,7 @@ class SnakeGame:
 	SPAWN_APPLES = pg.USEREVENT+1
 	MOVE = pg.USEREVENT+2
 	start_time = 0
+	score = 0
 
 	def start(self):
 		# Init PyGame
@@ -36,6 +38,8 @@ class SnakeGame:
 		pg.display.set_mode((self.width, self.height))
 		pg.display.set_caption("Staterpillar")
 		self.font = pg.font.SysFont('Comic Sans MS', 30)
+		self.info_font = pg.font.SysFont('Arial', 18)
+
 		# Init game logic
 		self.state = States.TITLE
 		# Set event timers
@@ -50,7 +54,7 @@ class SnakeGame:
 		self.check_events()
 		if self.state == States.GAME:
 			if self.snake.alive:
-				self.board.update_board(self.snake)
+				self.score = self.board.update_board(self.snake, self.score)
 			else:
 				self.state = States.DEAD
 		self.draw()
@@ -102,6 +106,16 @@ class SnakeGame:
 		self.screen.fill([0, 200, 0])
 		self.board.draw(self.screen)
 		self.snake.draw(self.screen)
+		# Draw info box
+		info_box = pg.Surface((200, 100))
+		info_box.set_alpha(200)
+		info_box.fill([255, 255, 255])
+		self.screen.blit(info_box, (0, 0))
+		# Draw info text
+		time_text = self.info_font.render("Elapsed Time: " + str((pg.time.get_ticks()-self.start_time)/1000), True, (0, 0, 0))
+		score_text = self.info_font.render("Score: " + str(self.score), True, (0, 0, 0))
+		self.screen.blit(time_text, (5, 5))
+		self.screen.blit(score_text, (5, 25))
 
 	def draw_score(self):
 		pass
