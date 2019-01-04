@@ -37,12 +37,30 @@ class Board:
 		if len(snake.segments) > 0:
 			# Checks if the snake's head is in a board tile with an apple
 			head_pos = (snake.segments[0].tile[0], snake.segments[0].tile[1])
-			if self.tiles[head_pos[0]][head_pos[1]] == BoardStates.APPLE:
-				# Eat the apple
-				snake.grow()
-				# Remove the apple from the board
-				self.tiles[head_pos[0]][head_pos[1]] = BoardStates.EMPTY
-		#  Handle snake's collisions with self and edge
+			try:
+				if self.tiles[head_pos[0]][head_pos[1]] == BoardStates.APPLE:
+					# Eat the apple
+					snake.grow()
+					# Remove the apple from the board
+					self.tiles[head_pos[0]][head_pos[1]] = BoardStates.EMPTY
+			# Make sure that the program doesn't crash if head is out of bounds (this is handled elsewhere)
+			except IndexError:
+				pass
+			# Handle snake collision with self
+			tiles_dict = {}
+			for segment in snake.segments:
+				if str(segment.tile) in tiles_dict:
+					snake.kill()
+				else:
+					tiles_dict[str(segment.tile)] = 1
+			#  Handle snake's collisions with edge
+			x = snake.segments[0].tile[0]
+			y = snake.segments[0].tile[1]
+
+			if x > self.x_tiles-1 or x < 0:
+				snake.kill()
+			if y > self.y_tiles-1 or y < 0:
+				snake.kill()
 
 	def draw(self, screen):
 		for col_index, tile_col in enumerate(self.tiles):

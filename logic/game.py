@@ -48,8 +48,9 @@ class SnakeGame:
 
 	def loop(self):
 		self.check_events()
-		self.board.update_board(self.snake)
-		if not self.snake.alive:
+		if self.snake.alive:
+			self.board.update_board(self.snake)
+		else:
 			self.state = States.DEAD
 		self.draw()
 		pg.display.update()
