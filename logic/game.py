@@ -48,10 +48,11 @@ class SnakeGame:
 
 	def loop(self):
 		self.check_events()
-		if self.snake.alive:
-			self.board.update_board(self.snake)
-		else:
-			self.state = States.DEAD
+		if self.state == States.GAME:
+			if self.snake.alive:
+				self.board.update_board(self.snake)
+			else:
+				self.state = States.DEAD
 		self.draw()
 		pg.display.update()
 
@@ -59,18 +60,25 @@ class SnakeGame:
 		for event in pg.event.get():
 			if event.type == pg.QUIT:
 				self.should_quit = True
-			if event.type == self.SPAWN_APPLES:
+			# Only spawn apples if event has been sent by timer and the player is in the game
+			if event.type == self.SPAWN_APPLES and self.state == States.GAME:
 				self.board.spawn_apples(self.apple_spawn_amount)
+			# Only move at correct time intervals
 			if event.type == self.MOVE:
 				self.snake.move()
+			# Check keypress
 			if event.type == pg.KEYDOWN:
+				# Quit on escape
 				if event.key == pg.K_ESCAPE:
 					self.should_quit = True
+				# Handle button input
 				if event.key == pg.K_SPACE:
 					if self.state == States.GAME:
 						self.snake.turn()
 					elif self.state == States.TITLE:
 						self.begin_game()
+					elif self.state == States.DEAD:
+						self.state = States.TITLE
 
 	# Draw functions
 
@@ -99,7 +107,10 @@ class SnakeGame:
 		pass
 
 	def draw_dead(self):
-		pass
+		white_box = pg.Rect(self.board.get_center()[0]-100, self.board.get_center()[1]-50, 200, 100)
+		pg.draw.rect(self.screen, (255, 255, 255), white_box)
+		title_text = self.font.render('You Died', True, (0, 0, 0))
+		self.screen.blit(title_text, ((self.width / 2) - title_text.get_rect().width / 2, (self.height / 2) - title_text.get_rect().height / 2))
 
 	def set_difficulty(self, difficulty):
 		if difficulty == Difficulties.EASY:
@@ -119,4 +130,5 @@ class SnakeGame:
 		self.start_time = pg.time.get_ticks()
 		self.snake = Snake(4)
 		self.snake.set_snake_pos(self.board.get_center_tile(), np.array([self.board.tile_size(), 0]), self.board.tile_size())
+		self.board.clear()
 		self.state = States.GAME

@@ -70,6 +70,9 @@ class Board:
 				elif tile == BoardStates.APPLE:
 					screen.blit(self.image_apple, (self.tile_size() * col_index, self.tile_size() * row_index))
 
+	def clear(self):
+		self.tiles = np.array([[BoardStates.EMPTY] * self.x_tiles] * self.y_tiles)
+
 	def get_center(self):
 		# NOTE: Take margins into account if those get added!!
 		tile_size = self.tile_size()
