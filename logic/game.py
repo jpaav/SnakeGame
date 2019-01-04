@@ -20,7 +20,7 @@ class SnakeGame:
 	difficulty = Difficulties(0)
 	apple_spawn_rate = 2000  # milliseconds between apple spawns
 	apple_spawn_amount = 1  # number of apples to spawn each time
-	snake_speed = 1000  # milliseconds between moves for snake
+	snake_speed = 500  # milliseconds between moves for snake
 	SPAWN_APPLES = pg.USEREVENT+1
 	MOVE = pg.USEREVENT+2
 	start_time = 0
@@ -37,7 +37,7 @@ class SnakeGame:
 		# Create screen with given dimensions
 		pg.display.set_mode((self.width, self.height))
 		pg.display.set_caption("Staterpillar")
-		self.font = pg.font.SysFont('Comic Sans MS', 30)
+		self.font = pg.font.SysFont('Arial', 48, 1, 1)
 		self.info_font = pg.font.SysFont('Arial', 18)
 
 		# Init game logic
@@ -89,6 +89,7 @@ class SnakeGame:
 	def draw(self):
 		if self.state == States.TITLE:
 			self.draw_title()
+			self.draw_instructions()
 		elif self.state == States.GAME:
 			self.draw_game()
 		elif self.state == States.SCORE:
@@ -98,9 +99,31 @@ class SnakeGame:
 
 	def draw_title(self):
 		# TODO: Replace this with a picture logo Ethan made
-		self.screen.fill([0, 200, 0])
+		self.screen.fill([100, 100, 100])
 		title_text = self.font.render('Stat-erpillar', True, (255, 255, 255))
 		self.screen.blit(title_text, ((self.width/2) - title_text.get_rect().width/2, 10))
+
+	def draw_instructions(self):
+		instructions1 = "Instructions: "
+		instructions2 = "Press the button to turn the snake. Collect as many apples as you can. "
+		instructions3 = "Don't let the snake leave the board or run into itself"
+		instructions4 = "Press to continue"
+		instruction1_text = self.info_font.render(instructions1, True, (255, 255, 255))
+		instruction2_text = self.info_font.render(instructions2, True, (255, 255, 255))
+		instruction3_text = self.info_font.render(instructions3, True, (255, 255, 255))
+		instruction4_text = self.info_font.render(instructions4, True, (255, 255, 255))
+		self.screen.blit(instruction1_text, (
+			(self.width / 2) - instruction1_text.get_rect().width / 2,
+			(self.height / 2) - instruction1_text.get_rect().height / 2))
+		self.screen.blit(instruction2_text, (
+			(self.width / 2) - instruction2_text.get_rect().width / 2,
+			(self.height / 2) - instruction2_text.get_rect().height / 2 + 50))
+		self.screen.blit(instruction3_text, (
+			(self.width / 2) - instruction3_text.get_rect().width / 2,
+			(self.height / 2) - instruction3_text.get_rect().height / 2 + 100))
+		self.screen.blit(instruction4_text, (
+			(self.width / 2) - instruction4_text.get_rect().width / 2,
+			(self.height / 2) - instruction4_text.get_rect().height / 2 + 150))
 
 	def draw_game(self):
 		self.screen.fill([0, 200, 0])
@@ -129,7 +152,7 @@ class SnakeGame:
 	def set_difficulty(self, difficulty):
 		if difficulty == Difficulties.EASY:
 			self.difficulty = difficulty.EASY
-			self.apple_spawn_rate = 2000
+			self.apple_spawn_rate = 5000
 			self.apple_spawn_amount = 1
 		if difficulty == Difficulties.MEDIUM:
 			self.difficulty = difficulty.MEDIUM
