@@ -8,8 +8,7 @@ import pygame as pg
 
 class BoardStates(Enum):
 	EMPTY = 0
-	# SNAKE = 1
-	APPLE = 2
+	APPLE = 1
 
 
 class Board:
@@ -19,7 +18,8 @@ class Board:
 		self.y_tiles = y_tiles
 		self.tiles = np.array([[BoardStates.EMPTY] * x_tiles] * y_tiles)
 		self.screen_dimensions = screen_dimensions
-		self.image_empty = pg.image.load("resources/board_empty.png")
+		self.image_empty = pg.image.load("resources/board_empty_nogridlines.png")
+		# self.image_empty = pg.image.load("resources/board_empty_gridlines.png")
 		self.image_apple = pg.image.load("resources/board_apple.png")
 		# Scale image to be proper dimensions according to class variables
 		self.image_empty = pg.transform.scale(self.image_empty, (self.tile_size(), self.tile_size()))

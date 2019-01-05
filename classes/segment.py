@@ -25,8 +25,14 @@ class Segment(pg.sprite.Sprite):
 	def __str__(self):
 		return str(self.position)
 
-	def draw(self, screen, draw_velocities):
-		screen.blit(self.image, self.position)
+	def draw(self, screen, draw_velocities, draw_simple):
+		if draw_simple:
+			# Draw circle
+			pg.draw.ellipse(screen, (0, 0, 0), pg.Rect(self.position[0], self.position[1], self.width, self.height))
+			if self.type == SegmentTypes.HEAD:
+				pg.draw.ellipse(screen, (255, 255, 255), pg.Rect(self.position[0]+(self.width*0.2), self.position[1]+(self.width*0.2), self.width*0.6, self.height*0.6))
+		else:
+			screen.blit(self.image, self.position)
 		if draw_velocities:
 			self.image.fill([255, 255, 255])
 			font = pg.font.SysFont('Comic Sans MS', 10)

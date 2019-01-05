@@ -15,8 +15,8 @@ from logic.states import States
 
 class SnakeGame:
 	should_quit = False
-	height = 600
-	width = 600
+	height = 592
+	width = 592
 	state = States(0)
 	screen = pg.display.set_mode((width, height))
 	font = None
@@ -32,6 +32,7 @@ class SnakeGame:
 	start_time = 0
 	score = 0
 	should_upload_scores = True
+	image_title = None
 
 	def start(self):
 		# Init PyGame
@@ -43,10 +44,13 @@ class SnakeGame:
 			return 1
 		# Create screen with given dimensions
 		pg.display.set_mode((self.width, self.height))
-		pg.display.set_caption("Staterpillar")
+		pg.display.set_caption("Stat-erpillar")
+		# Set up fonts
 		self.font = pg.font.SysFont('Comic Sans MS', 30)
 		self.info_font = pg.font.SysFont('Arial', 18)
-
+		# Load images
+		self.image_title = pg.image.load('resources/titlescreen.png')
+		self.image_title = pg.transform.scale(self.image_title, (self.width, self.height))
 		# Init game logic
 		self.state = States.TITLE
 		# Set event timers
@@ -110,8 +114,9 @@ class SnakeGame:
 	def draw_title(self):
 		# TODO: Replace this with a picture logo Ethan made
 		self.screen.fill([0, 200, 0])
-		title_text = self.font.render('Stat-erpillar', True, (255, 255, 255))
-		self.screen.blit(title_text, ((self.width/2) - title_text.get_rect().width/2, 10))
+		# title_text = self.font.render('Stat-erpillar', True, (255, 255, 255))
+		# self.screen.blit(title_text, ((self.width/2) - title_text.get_rect().width/2, 10))
+		self.screen.blit(self.image_title, (self.width/2 - self.image_title.get_rect().width / 2, 0))
 
 	def draw_game(self):
 		self.screen.fill([0, 200, 0])
@@ -153,7 +158,7 @@ class SnakeGame:
 
 	def begin_game(self):
 		self.start_time = pg.time.get_ticks()
-		self.snake = Snake(4)
+		self.snake = Snake(4, draw_simple=True)
 		self.snake.set_snake_pos(self.board.get_center_tile(), np.array([self.board.tile_size(), 0]), self.board.tile_size())
 		self.board.clear()
 		self.score = 0
