@@ -1,5 +1,11 @@
+import datetime
+
 import numpy as np
 import pygame as pg
+from googleapiclient.discovery import build
+from httplib2 import Http
+from oauth2client import file, client, tools
+from uuid import getnode
 
 from classes.board import Board
 from classes.snake import Snake
@@ -9,8 +15,8 @@ from logic.states import States
 
 class SnakeGame:
 	should_quit = False
-	height = 600
-	width = 600
+	height = 592
+	width = 592
 	state = States(0)
 	screen = pg.display.set_mode((width, height))
 	font = None
@@ -25,6 +31,8 @@ class SnakeGame:
 	MOVE = pg.USEREVENT+2
 	start_time = 0
 	score = 0
+	should_upload_scores = True
+	image_title = None
 
 	def start(self):
 		# Init PyGame
@@ -36,10 +44,13 @@ class SnakeGame:
 			return 1
 		# Create screen with given dimensions
 		pg.display.set_mode((self.width, self.height))
-		pg.display.set_caption("Staterpillar")
-		self.font = pg.font.SysFont('Arial', 48, 1, 1)
+		pg.display.set_caption("Stat-erpillar")
+		# Set up fonts
+		self.font = pg.font.SysFont('Comic Sans MS', 30)
 		self.info_font = pg.font.SysFont('Arial', 18)
-
+		# Load images
+		self.image_title = pg.image.load('resources/titlescreen.png')
+		self.image_title = pg.transform.scale(self.image_title, (self.width, self.height))
 		# Init game logic
 		self.state = States.TITLE
 		# Set event timers
@@ -56,6 +67,10 @@ class SnakeGame:
 			if self.snake.alive:
 				self.score = self.board.update_board(self.snake, self.score)
 			else:
+				# Upload score
+				if self.should_upload_scores:
+					self.upload_score()
+				# Go to dead state
 				self.state = States.DEAD
 		self.draw()
 		pg.display.update()
@@ -89,7 +104,6 @@ class SnakeGame:
 	def draw(self):
 		if self.state == States.TITLE:
 			self.draw_title()
-			self.draw_instructions()
 		elif self.state == States.GAME:
 			self.draw_game()
 		elif self.state == States.SCORE:
@@ -99,31 +113,10 @@ class SnakeGame:
 
 	def draw_title(self):
 		# TODO: Replace this with a picture logo Ethan made
-		self.screen.fill([100, 100, 100])
-		title_text = self.font.render('Stat-erpillar', True, (255, 255, 255))
-		self.screen.blit(title_text, ((self.width/2) - title_text.get_rect().width/2, 10))
-
-	def draw_instructions(self):
-		instructions1 = "Instructions: "
-		instructions2 = "Press the button to turn the snake. Collect as many apples as you can. "
-		instructions3 = "Don't let the snake leave the board or run into itself"
-		instructions4 = "Press to continue"
-		instruction1_text = self.info_font.render(instructions1, True, (255, 255, 255))
-		instruction2_text = self.info_font.render(instructions2, True, (255, 255, 255))
-		instruction3_text = self.info_font.render(instructions3, True, (255, 255, 255))
-		instruction4_text = self.info_font.render(instructions4, True, (255, 255, 255))
-		self.screen.blit(instruction1_text, (
-			(self.width / 2) - instruction1_text.get_rect().width / 2,
-			(self.height / 2) - instruction1_text.get_rect().height / 2))
-		self.screen.blit(instruction2_text, (
-			(self.width / 2) - instruction2_text.get_rect().width / 2,
-			(self.height / 2) - instruction2_text.get_rect().height / 2 + 50))
-		self.screen.blit(instruction3_text, (
-			(self.width / 2) - instruction3_text.get_rect().width / 2,
-			(self.height / 2) - instruction3_text.get_rect().height / 2 + 100))
-		self.screen.blit(instruction4_text, (
-			(self.width / 2) - instruction4_text.get_rect().width / 2,
-			(self.height / 2) - instruction4_text.get_rect().height / 2 + 150))
+		self.screen.fill([0, 200, 0])
+		# title_text = self.font.render('Stat-erpillar', True, (255, 255, 255))
+		# self.screen.blit(title_text, ((self.width/2) - title_text.get_rect().width/2, 10))
+		self.screen.blit(self.image_title, (self.width/2 - self.image_title.get_rect().width / 2, 0))
 
 	def draw_game(self):
 		self.screen.fill([0, 200, 0])
@@ -152,7 +145,7 @@ class SnakeGame:
 	def set_difficulty(self, difficulty):
 		if difficulty == Difficulties.EASY:
 			self.difficulty = difficulty.EASY
-			self.apple_spawn_rate = 5000
+			self.apple_spawn_rate = 2000
 			self.apple_spawn_amount = 1
 		if difficulty == Difficulties.MEDIUM:
 			self.difficulty = difficulty.MEDIUM
@@ -165,7 +158,34 @@ class SnakeGame:
 
 	def begin_game(self):
 		self.start_time = pg.time.get_ticks()
-		self.snake = Snake(4)
+		self.snake = Snake(4, draw_simple=True)
 		self.snake.set_snake_pos(self.board.get_center_tile(), np.array([self.board.tile_size(), 0]), self.board.tile_size())
 		self.board.clear()
+		self.score = 0
 		self.state = States.GAME
+
+	def upload_score(self):
+		SCOPES = 'https://www.googleapis.com/auth/spreadsheets'
+		store = file.Storage('token.json')
+		creds = store.get()
+		if not creds or creds.invalid:
+			flow = client.flow_from_clientsecrets('credentials.json', SCOPES)
+			creds = tools.run_flow(flow, store)
+		service = build('sheets', 'v4', http=creds.authorize(Http()))
+
+		# Call the Sheets API
+		sheet = service.spreadsheets()
+		dt = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+		new_entry = [
+			[
+				dt, self.score, getnode(), pg.time.get_ticks() - self.start_time
+			]
+		]
+		body = {
+			'values': new_entry
+		}
+		result = sheet.values().append(
+			spreadsheetId='1vxIHPnCOS1Uv42N-aKQwkB3daFM-0W23-A_It9vYEPw', range='Uploaded_Data!A1:D1',
+			valueInputOption="USER_ENTERED", body=body).execute()
+		print('{0} cells appended .'.format(result.get('updates').get('updatedCells')))
+

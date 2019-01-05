@@ -13,7 +13,7 @@ class Snake:
 	# First value should be head position, last value should be tail position
 	segments = []
 
-	def __init__(self, length=3):
+	def __init__(self, length=3, draw_simple=False):
 		# Includes head and tail
 		self.length = length
 		# TODO: Maybe remove this line from __init__?
@@ -26,6 +26,7 @@ class Snake:
 		self.left_turn = None
 		# If this is true, velocities will be drawn on the segments for debugging purposes
 		self.draw_velocities = False
+		self.draw_simple = draw_simple
 
 	def move(self):
 		# Don't move if dead
@@ -111,6 +112,6 @@ class Snake:
 
 	def draw(self, screen):
 		for segment in self.segments:
-			segment.draw(screen, self.draw_velocities)
+			segment.draw(screen, self.draw_velocities, self.draw_simple)
 
 
