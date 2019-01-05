@@ -26,7 +26,7 @@ class SnakeGame:
 	difficulty = Difficulties(0)
 	apple_spawn_rate = 2000  # milliseconds between apple spawns
 	apple_spawn_amount = 1  # number of apples to spawn each time
-	snake_speed = 1000  # milliseconds between moves for snake
+	snake_speed = 500  # milliseconds between moves for snake
 	SPAWN_APPLES = pg.USEREVENT+1
 	MOVE = pg.USEREVENT+2
 	start_time = 0
