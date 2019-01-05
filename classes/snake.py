@@ -76,7 +76,7 @@ class Snake:
 		# If the player has already pressed space once, don't let them change the direction to a new random value
 		if self.should_turn:
 			return
-		self.left_turn = random.choices([True, False])[0]
+		self.left_turn = bool(random.randint(0, 1))
 		self.should_turn = True
 
 	def kill(self):
