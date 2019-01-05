@@ -1,5 +1,11 @@
+import datetime
+
 import numpy as np
 import pygame as pg
+from googleapiclient.discovery import build
+from httplib2 import Http
+from oauth2client import file, client, tools
+from uuid import getnode
 
 from classes.board import Board
 from classes.snake import Snake
@@ -25,6 +31,7 @@ class SnakeGame:
 	MOVE = pg.USEREVENT+2
 	start_time = 0
 	score = 0
+	should_upload_scores = True
 
 	def start(self):
 		# Init PyGame
@@ -56,6 +63,10 @@ class SnakeGame:
 			if self.snake.alive:
 				self.score = self.board.update_board(self.snake, self.score)
 			else:
+				# Upload score
+				if self.should_upload_scores:
+					self.upload_score()
+				# Go to dead state
 				self.state = States.DEAD
 		self.draw()
 		pg.display.update()
@@ -145,4 +156,31 @@ class SnakeGame:
 		self.snake = Snake(4)
 		self.snake.set_snake_pos(self.board.get_center_tile(), np.array([self.board.tile_size(), 0]), self.board.tile_size())
 		self.board.clear()
+		self.score = 0
 		self.state = States.GAME
+
+	def upload_score(self):
+		SCOPES = 'https://www.googleapis.com/auth/spreadsheets'
+		store = file.Storage('token.json')
+		creds = store.get()
+		if not creds or creds.invalid:
+			flow = client.flow_from_clientsecrets('credentials.json', SCOPES)
+			creds = tools.run_flow(flow, store)
+		service = build('sheets', 'v4', http=creds.authorize(Http()))
+
+		# Call the Sheets API
+		sheet = service.spreadsheets()
+		dt = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+		new_entry = [
+			[
+				dt, self.score, getnode(), pg.time.get_ticks() - self.start_time
+			]
+		]
+		body = {
+			'values': new_entry
+		}
+		result = sheet.values().append(
+			spreadsheetId='1vxIHPnCOS1Uv42N-aKQwkB3daFM-0W23-A_It9vYEPw', range='Uploaded_Data!A1:D1',
+			valueInputOption="USER_ENTERED", body=body).execute()
+		print('{0} cells appended .'.format(result.get('updates').get('updatedCells')))
+
