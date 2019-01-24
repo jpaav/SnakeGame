@@ -31,7 +31,7 @@ class SnakeGame:
 	MOVE = pg.USEREVENT+2
 	start_time = 0
 	score = 0
-	should_upload_scores = True
+	should_upload_scores = False
 	image_title = None
 
 	def start(self):
